@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Value coloring from gradient color</title>
+</head>
+<body>
+<p id="output">
+<canvas id="canvas"></canvas>
+</p>
+<script>
+    function rgbToHex(r, g, b) {
+  	var red = r.toString(16).padStart(2, '0');
+  	var green = g.toString(16).padStart(2, '0');
+  	var blue = b.toString(16).padStart(2, '0');
+  	return "#" + red + green + blue;
+    }
+
+    function getGradientColor(low, lowColor, mid, midColor, up, upColor, value) {
+	if ( (up-low) == 0 )  return lowColor;
+
+	const canvas = document.getElementById("canvas");
+	const ctx = canvas.getContext("2d");  
+
+	// Create a linear gradient
+	var gradient = ctx.createLinearGradient(low, 0, up+1, 0);   //(x0,y0,x1,y1)
+
+	gradient.addColorStop(0, lowColor);                      // 0-1
+	if ( midColor != null && up-low != 0 ) gradient.addColorStop((mid-low)/(up-low), midColor);
+	gradient.addColorStop(1, upColor);
+
+	// Fill the canvas with the gradient
+	ctx.fillStyle = gradient;
+	ctx.fillRect(low, 0, up-low, 1);                        // (x0,y0,w,h)
+
+	// Get the color at a specific position
+	var imageData = ctx.getImageData(value, 0, 1, 1);
+	//var color = 'rgb(' + imageData.data[0] + ',' + imageData.data[1] + ',' + imageData.data[2] + ')';
+	var color = rgbToHex( imageData.data[0] , imageData.data[1], imageData.data[2] )
+        return color;
+	//console.log("Color at position 100: " + color);
+    }
+
+    function rgbToHex(r, g, b) {
+  	var red = r.toString(16).padStart(2, '0');
+  	var green = g.toString(16).padStart(2, '0');
+  	var blue = b.toString(16).padStart(2, '0');
+  	return "#" + red + green + blue;
+    }
+
+    // Function to get URL parameters
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, '\\$&');
+      var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    // Get the value of the "param" parameter from the URL
+    var low = Number(getParameterByName('low'));
+    var lowColor = getParameterByName('lowColor');
+    var mid = Number(getParameterByName('mid'));
+    var midColor = getParameterByName('midColor');
+    var up = Number(getParameterByName('up'));
+    var upColor = getParameterByName('upColor');
+    var value=getParameterByName('value');
+
+    var color = getGradientColor(low, lowColor, mid, midColor, up, upColor, Number(value));
+    document.getElementById('output').innerHTML = '<span style="background-color:'+color+'">'+value+'</span>' ; 
+</script>
+<!--  give a value for 3-point gradient coloring: file:///C:/Users/bwang1/Desktop/textcoloring.htm?low=0&lowColor=%23ff8888&up=100&upColor=%2388ff88&value=25> 
+-!>
+</body>
+</html>
